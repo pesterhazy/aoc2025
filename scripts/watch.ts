@@ -68,7 +68,7 @@ async function sendNotification(result: {
 
   if (result.vetPassed && result.testPassed) {
     title = SUCCESS_EMOJI;
-    message = "";
+    message = "OK";
   } else if (!result.vetPassed) {
     title = TYPE_CHECK_FAILURE_EMOJI;
     message = result.errorOutput;
