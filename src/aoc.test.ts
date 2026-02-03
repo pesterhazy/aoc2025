@@ -16,7 +16,7 @@ function parseInput09(input: string): { x: number; y: number }[] {
   });
 }
 
-function day09(input: { x: number; y: number }[]): number {
+function day09a(input: { x: number; y: number }[]): number {
   let maxArea = -Infinity;
   for (let i = 0; i < input.length; i++) {
     for (let j = 0; j < input.length; j++) {
@@ -35,12 +35,12 @@ function day09(input: { x: number; y: number }[]): number {
 
 test("day09 example", () => {
   const input = parseInput09(example09);
-  const result = day09(input);
+  const result = day09a(input);
   assert.equal(result, 50);
 });
 
 test("day09 input", () => {
   const input = parseInput09(readFileSync("inputs/day09.txt", "utf8"));
-  const result = day09(input);
-  assert.equal(result, 42);
+  const result = day09a(input);
+  assert.equal(result, 4771508457);
 });
