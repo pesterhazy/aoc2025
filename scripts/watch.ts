@@ -35,7 +35,11 @@ async function* watchFiles() {
   }
 }
 
-function displayStatus(result: { vetPassed: boolean; testPassed: boolean }) {
+function displayStatus(result: {
+  vetPassed: boolean;
+  testPassed: boolean;
+  errorOutput: string;
+}) {
   let color: string;
   let status: string;
 
@@ -57,32 +61,39 @@ function displayStatus(result: { vetPassed: boolean; testPassed: boolean }) {
 async function sendNotification(result: {
   vetPassed: boolean;
   testPassed: boolean;
+  errorOutput: string;
 }) {
   let message: string;
 
   if (result.vetPassed && result.testPassed) {
     message = SUCCESS_EMOJI;
   } else if (!result.vetPassed) {
-    message = `${TYPE_CHECK_FAILURE_EMOJI}\n\nType check failed`;
+    message = `${TYPE_CHECK_FAILURE_EMOJI}\n${result.errorOutput}`;
   } else {
-    message = `${TEST_FAILURE_EMOJI}\n\nTests failed`;
+    message = `${TEST_FAILURE_EMOJI}\n${result.errorOutput}`;
   }
 
   await $`osascript -e "display notification \"${message}\" with title \"${NOTIFICATION_TITLE}\""`.nothrow();
 }
 
 async function runChecks() {
-  const vetResult = await $`dum vet`.nothrow();
+  const vetResult = await $`dum --silent vet`.nothrow();
   const vetPassed = vetResult.exitCode === 0;
 
   if (!vetPassed) {
-    return { vetPassed: false, testPassed: false };
+    const errorOutput = await vetResult.text();
+    return { vetPassed: false, testPassed: false, errorOutput };
   }
 
-  const testResult = await $`dum test`.nothrow();
+  const testResult = await $`dum --silent test`.nothrow();
   const testPassed = testResult.exitCode === 0;
 
-  return { vetPassed, testPassed };
+  if (!testPassed) {
+    const errorOutput = await testResult.text();
+    return { vetPassed, testPassed, errorOutput };
+  }
+
+  return { vetPassed, testPassed, errorOutput: "" };
 }
 
 async function runCheckAndNotify() {
