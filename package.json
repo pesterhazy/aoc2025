@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "vet": "tsc --noEmit"
+    "vet": "tsgo --noEmit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20260203.1",
     "vitest": "^4.0.18"
   }
 }
