@@ -28,14 +28,14 @@ async function main() {
     if (result.exitCode === 0) {
       console.log("\x1b[32m" + "█".repeat(50) + "\x1b[0m");
       console.log("\x1b[32mOK\x1b[0m");
-      const message = "✅ Type checking passed";
-      const title = "dum vet";
+      const message = "🟩🟩🟩🟩🟩🟩🟩🟩";
+      const title = "Watch";
       await $`osascript -e "display notification \"${message}\" with title \"${title}\""`.nothrow();
     } else {
       console.log("\x1b[31m" + "█".repeat(50) + "\x1b[0m");
       console.log("\x1b[31mFAILED\x1b[0m");
-      const message = "❌ Type checking failed";
-      const title = "dum vet";
+      const message = "🟥🟥🟥🟥🟥🟥🟥🟥";
+      const title = "Watch";
       await $`osascript -e "display notification \"${message}\" with title \"${title}\""`.nothrow();
     }
   }
