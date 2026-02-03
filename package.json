@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest run",
-    "tw": "vitest",
+    "watch": "bun scripts/watch.ts",
     "vet": "tsgo --noEmit"
   },
   "keywords": [],
