@@ -2,6 +2,7 @@
 
 import { watch } from "fs/promises";
 import { $ } from "bun";
+import { existsSync, readFileSync, rmSync } from "fs";
 
 const COLORS = {
   green: "\x1b[32m",
@@ -15,7 +16,7 @@ const SUCCESS_EMOJI = "🟩".repeat(8);
 const TEST_FAILURE_EMOJI = "🟥".repeat(8);
 const TYPE_CHECK_FAILURE_EMOJI = "🟨".repeat(8);
 
-const IGNORED_PATHS = [".git", "node_modules"];
+const IGNORED_PATHS = [".git", "node_modules", "test-output.json"];
 
 async function* watchFiles() {
   const watcher = watch(".", { recursive: true });
@@ -95,11 +96,18 @@ async function runChecks() {
     return { vetPassed: false, testPassed: false, errorOutput };
   }
 
-  const testResult = await $`dum --silent test`.nothrow();
+  rmSync("test-output.json", { force: true });
+
+  const testResult =
+    await $`dum --silent test -- --reporter=json --outputFile=./test-output.json --reporter=default`.nothrow();
   const testPassed = testResult.exitCode === 0;
 
   if (!testPassed) {
-    const errorOutput = await testResult.text();
+    let errorOutput = "";
+    if (existsSync("test-output.json")) {
+      const testOutput = JSON.parse(readFileSync("test-output.json", "utf8"));
+      errorOutput = `failed=${testOutput.numFailedTests} (total=${testOutput.numTotalTests})`;
+    }
     return { vetPassed, testPassed, errorOutput };
   }
 

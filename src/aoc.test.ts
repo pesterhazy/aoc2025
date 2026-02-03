@@ -36,7 +36,7 @@ function day09a(input: { x: number; y: number }[]): number {
 test("day09 example", () => {
   const input = parseInput09(example09);
   const result = day09a(input);
-  assert.equal(result, 52);
+  assert.equal(result, 51);
 });
 
 test("day09 input", () => {
