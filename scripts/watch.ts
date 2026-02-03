@@ -3,16 +3,29 @@
 import { watch } from "fs/promises";
 import { $ } from "bun";
 
+const COLORS = {
+  green: "\x1b[32m",
+  red: "\x1b[31m",
+  reset: "\x1b[0m",
+} as const;
+
+const BAR_LENGTH = 50;
+const NOTIFICATION_TITLE = "Watch";
+const SUCCESS_EMOJI = "🟩".repeat(8);
+const FAILURE_EMOJI = "🟥".repeat(8);
+
+const IGNORED_PATHS = [".git", "node_modules"];
+
 async function* watchFiles() {
   const watcher = watch(".", { recursive: true });
 
   for await (const event of watcher) {
-    if (
-      event.filename?.startsWith(".git/") ||
-      event.filename === ".git" ||
-      event.filename?.startsWith("node_modules/") ||
-      event.filename === "node_modules"
-    ) {
+    const shouldIgnore = IGNORED_PATHS.some(
+      (path) =>
+        event.filename === path || event.filename?.startsWith(`${path}/`)
+    );
+
+    if (shouldIgnore) {
       continue;
     }
 
@@ -20,35 +33,36 @@ async function* watchFiles() {
   }
 }
 
+function displayStatus(success: boolean) {
+  const color = success ? COLORS.green : COLORS.red;
+  const status = success ? "OK" : "FAILED";
+
+  console.log(color + "█".repeat(BAR_LENGTH) + COLORS.reset);
+  console.log(color + status + COLORS.reset);
+}
+
+async function sendNotification(success: boolean) {
+  const message = success ? SUCCESS_EMOJI : FAILURE_EMOJI;
+  await $`osascript -e "display notification \"${message}\" with title \"${NOTIFICATION_TITLE}\""`.nothrow();
+}
+
+async function runChecks() {
+  const vetResult = await $`dum vet`.nothrow();
+  if (vetResult.exitCode !== 0) {
+    return false;
+  }
+
+  const testResult = await $`dum test`.nothrow();
+  return testResult.exitCode === 0;
+}
+
 async function main() {
   for await (const event of watchFiles()) {
     console.log(`\nFile changed: ${event.filename}`);
-    const vetResult = await $`dum vet`.nothrow();
 
-    if (vetResult.exitCode !== 0) {
-      console.log("\x1b[31m" + "█".repeat(50) + "\x1b[0m");
-      console.log("\x1b[31mFAILED\x1b[0m");
-      const message = "🟥🟥🟥🟥🟥🟥🟥🟥";
-      const title = "Watch";
-      await $`osascript -e "display notification \"${message}\" with title \"${title}\""`.nothrow();
-      continue;
-    }
-
-    const testResult = await $`dum test`.nothrow();
-
-    if (testResult.exitCode === 0) {
-      console.log("\x1b[32m" + "█".repeat(50) + "\x1b[0m");
-      console.log("\x1b[32mOK\x1b[0m");
-      const message = "🟩🟩🟩🟩🟩🟩🟩🟩";
-      const title = "Watch";
-      await $`osascript -e "display notification \"${message}\" with title \"${title}\""`.nothrow();
-    } else {
-      console.log("\x1b[31m" + "█".repeat(50) + "\x1b[0m");
-      console.log("\x1b[31mFAILED\x1b[0m");
-      const message = "🟥🟥🟥🟥🟥🟥🟥🟥";
-      const title = "Watch";
-      await $`osascript -e "display notification \"${message}\" with title \"${title}\""`.nothrow();
-    }
+    const success = await runChecks();
+    displayStatus(success);
+    await sendNotification(success);
   }
 }
 
