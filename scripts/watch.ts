@@ -23,9 +23,20 @@ async function* watchFiles() {
 async function main() {
   for await (const event of watchFiles()) {
     console.log(`\nFile changed: ${event.filename}`);
-    const result = await $`dum vet`.nothrow();
+    const vetResult = await $`dum vet`.nothrow();
 
-    if (result.exitCode === 0) {
+    if (vetResult.exitCode !== 0) {
+      console.log("\x1b[31m" + "█".repeat(50) + "\x1b[0m");
+      console.log("\x1b[31mFAILED\x1b[0m");
+      const message = "🟥🟥🟥🟥🟥🟥🟥🟥";
+      const title = "Watch";
+      await $`osascript -e "display notification \"${message}\" with title \"${title}\""`.nothrow();
+      continue;
+    }
+
+    const testResult = await $`dum test`.nothrow();
+
+    if (testResult.exitCode === 0) {
       console.log("\x1b[32m" + "█".repeat(50) + "\x1b[0m");
       console.log("\x1b[32mOK\x1b[0m");
       const message = "🟩🟩🟩🟩🟩🟩🟩🟩";

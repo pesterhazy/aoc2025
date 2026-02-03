@@ -13,7 +13,8 @@ function parseInput09(input: string): { x: number; y: number }[] {
     return { x, y };
   });
 }
-test("should work", () => {
+
+test("parseInput09", () => {
   const input = parseInput09(example09);
-  assert.equal(input.length, 8);
+  expect(input.length).toBe(8);
 });
