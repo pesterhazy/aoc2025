@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(dum vet:*)",
-      "Bash(dum test:*)"
+      "Bash(dum test:*)",
+      "Bash(mise install:*)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": [],

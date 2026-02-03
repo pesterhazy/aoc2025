@@ -1,8 +1,9 @@
 # Claude Development Guide
 
-## Package Management
+## Tools
 
 - **Bun** is used ONLY as a package manager
+- Use `dum` instead of `npm` to run scripts. E.g. `dum test` instead `dum run test`
 
 ## Running Tests
 

@@ -4,7 +4,8 @@
   "description": "Advent of code 2025",
   "main": "index.js",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "vet": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",

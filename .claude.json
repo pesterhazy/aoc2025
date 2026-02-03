@@ -1,9 +1,0 @@
-{
-  "allowedTools": ["WebSearch"],
-  "allowedPrompts": [
-    {
-      "tool": "Bash",
-      "prompt": "mise install"
-    }
-  ]
-}
