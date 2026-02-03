@@ -63,14 +63,33 @@ async function runCheckAndNotify() {
 }
 
 async function main() {
-  // Run checks immediately on startup
-  console.log("\nInitial check...");
   await runCheckAndNotify();
 
-  // Watch for file changes
-  for await (const event of watchFiles()) {
-    console.log(`\nFile changed: ${event.filename}`);
-    await runCheckAndNotify();
+  let testRunCounter = 0;
+  let lastRunCounter = 0;
+  let resolveWait: null | (() => void) = null;
+
+  (async () => {
+    for await (const event of watchFiles()) {
+      console.log(`\nFile changed: ${event.filename}`);
+      testRunCounter++;
+      if (resolveWait) {
+        const resolve: () => void = resolveWait;
+        resolveWait = null;
+        resolve();
+      }
+    }
+  })();
+
+  while (true) {
+    if (testRunCounter > lastRunCounter) {
+      lastRunCounter = testRunCounter;
+      await runCheckAndNotify();
+    } else {
+      await new Promise<void>((resolve) => {
+        resolveWait = resolve;
+      });
+    }
   }
 }
 
