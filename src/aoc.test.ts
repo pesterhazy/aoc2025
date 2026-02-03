@@ -1,3 +1,5 @@
+import { readFileSync } from "fs";
+
 const example09 = `7,1
 11,1
 11,7
@@ -31,8 +33,14 @@ function day09(input: { x: number; y: number }[]): number {
   return maxArea;
 }
 
-test("day09", () => {
+test("day09 example", () => {
   const input = parseInput09(example09);
   const result = day09(input);
   assert.equal(result, 50);
+});
+
+test("day09 input", () => {
+  const input = parseInput09(readFileSync("inputs/day09.txt", "utf8"));
+  const result = day09(input);
+  assert.equal(result, 42);
 });
