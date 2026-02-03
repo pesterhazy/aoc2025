@@ -3,6 +3,9 @@
 import { watch } from "fs";
 
 const watcher = watch(".", { recursive: true }, (event, filename) => {
+  if (filename?.startsWith(".git/") || filename === ".git") {
+    return;
+  }
   console.log(`Detected ${event} in ${filename}`);
 });
 
