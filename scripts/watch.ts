@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 
 import { watch } from "fs/promises";
+import { $ } from "bun";
 
 async function* watchFiles() {
   const watcher = watch(".", { recursive: true });
@@ -16,7 +17,15 @@ async function* watchFiles() {
 
 async function main() {
   for await (const event of watchFiles()) {
-    console.log(`Detected ${event.eventType} in ${event.filename}`);
+    const result = await $`dum vet`.nothrow();
+
+    if (result.exitCode === 0) {
+      console.log("\x1b[32m" + "█".repeat(50) + "\x1b[0m");
+      console.log("\x1b[32mOK\x1b[0m");
+    } else {
+      console.log("\x1b[31m" + "█".repeat(50) + "\x1b[0m");
+      console.log("\x1b[31mFAILED\x1b[0m");
+    }
   }
 }
 
