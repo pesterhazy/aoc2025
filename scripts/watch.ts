@@ -1,16 +1,28 @@
 #!/usr/bin/env bun
 
-import { watch } from "fs";
+import { watch } from "fs/promises";
 
-const watcher = watch(".", { recursive: true }, (event, filename) => {
-  if (filename?.startsWith(".git/") || filename === ".git") {
-    return;
+async function* watchFiles() {
+  const watcher = watch(".", { recursive: true });
+
+  for await (const event of watcher) {
+    if (event.filename?.startsWith(".git/") || event.filename === ".git") {
+      continue;
+    }
+
+    yield event;
   }
-  console.log(`Detected ${event} in ${filename}`);
-});
+}
+
+async function main() {
+  for await (const event of watchFiles()) {
+    console.log(`Detected ${event.eventType} in ${event.filename}`);
+  }
+}
 
 process.on("SIGINT", () => {
   console.log("\nClosing watcher...");
-  watcher.close();
   process.exit(0);
 });
+
+main();
