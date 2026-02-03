@@ -1,11 +1,3 @@
-import { describe, it, expect } from 'vitest'
-
-// Production code
-
-
-// Tests
-describe('AOC', () => {
-  it('should work', () => {
-    expect(true).toBe(true)
-  })
-})
+test("should work", () => {
+  assert.equal(1, 1);
+});
