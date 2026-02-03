@@ -14,7 +14,25 @@ function parseInput09(input: string): { x: number; y: number }[] {
   });
 }
 
-test("parseInput09", () => {
+function day09(input: { x: number; y: number }[]): number {
+  let maxArea = -Infinity;
+  for (let i = 0; i < input.length; i++) {
+    for (let j = 0; j < input.length; j++) {
+      if (i === j) continue;
+
+      const area =
+        (1 + Math.abs(input[i].x - input[j].x)) *
+        (1 + Math.abs(input[i].y - input[j].y));
+      if (area > maxArea) {
+        maxArea = area;
+      }
+    }
+  }
+  return maxArea;
+}
+
+test("day09", () => {
   const input = parseInput09(example09);
-  assert.equal(input.length, 8);
+  const result = day09(input);
+  assert.equal(result, 50);
 });
