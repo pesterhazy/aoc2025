@@ -56,13 +56,21 @@ async function runChecks() {
   return testResult.exitCode === 0;
 }
 
+async function runCheckAndNotify() {
+  const success = await runChecks();
+  displayStatus(success);
+  await sendNotification(success);
+}
+
 async function main() {
+  // Run checks immediately on startup
+  console.log("\nInitial check...");
+  await runCheckAndNotify();
+
+  // Watch for file changes
   for await (const event of watchFiles()) {
     console.log(`\nFile changed: ${event.filename}`);
-
-    const success = await runChecks();
-    displayStatus(success);
-    await sendNotification(success);
+    await runCheckAndNotify();
   }
 }
 
