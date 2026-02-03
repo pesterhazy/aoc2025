@@ -4,7 +4,8 @@
   "description": "Advent of code 2025",
   "main": "index.js",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest run",
+    "tw": "vitest",
     "vet": "tsgo --noEmit"
   },
   "keywords": [],
@@ -12,6 +13,7 @@
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@types/node": "^25.2.0",
     "@typescript/native-preview": "^7.0.0-dev.20260203.1",
     "vitest": "^4.0.18"
   }
