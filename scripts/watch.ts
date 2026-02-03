@@ -11,7 +11,6 @@ const COLORS = {
 } as const;
 
 const BAR_LENGTH = 50;
-const NOTIFICATION_TITLE = "Watch";
 const SUCCESS_EMOJI = "🟩".repeat(8);
 const TEST_FAILURE_EMOJI = "🟥".repeat(8);
 const TYPE_CHECK_FAILURE_EMOJI = "🟨".repeat(8);
@@ -63,17 +62,28 @@ async function sendNotification(result: {
   testPassed: boolean;
   errorOutput: string;
 }) {
+  let title: string;
   let message: string;
 
   if (result.vetPassed && result.testPassed) {
-    message = SUCCESS_EMOJI;
+    title = SUCCESS_EMOJI;
+    message = "";
   } else if (!result.vetPassed) {
-    message = `${TYPE_CHECK_FAILURE_EMOJI}\n${result.errorOutput}`;
+    title = TYPE_CHECK_FAILURE_EMOJI;
+    message = result.errorOutput;
   } else {
-    message = `${TEST_FAILURE_EMOJI}\n${result.errorOutput}`;
+    title = TEST_FAILURE_EMOJI;
+    message = result.errorOutput;
   }
 
-  await $`osascript -e "display notification \"${message}\" with title \"${NOTIFICATION_TITLE}\""`.nothrow();
+  const script = `display notification "${message.replace(
+    /"/g,
+    '\\"'
+  )}" with title "${title.replace(/"/g, '\\"')}"`;
+  await Bun.spawn(["osascript", "-e", script], {
+    stdout: "inherit",
+    stderr: "inherit",
+  }).exited;
 }
 
 async function runChecks() {
