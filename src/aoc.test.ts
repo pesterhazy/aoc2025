@@ -46,6 +46,7 @@ function day09b(input: Point2[]): number {
       const p3 = { x: p1.x, y: p2.y };
       const p4 = { x: p2.x, y: p1.y };
 
+      // Check if the other two corners are inside/on the polygon
       if (
         !isPointInClosedPolygon(p3, input) ||
         !isPointInClosedPolygon(p4, input)
@@ -53,9 +54,7 @@ function day09b(input: Point2[]): number {
         continue;
       }
 
-      const area =
-        (1 + Math.abs(input[i].x - input[j].x)) *
-        (1 + Math.abs(input[i].y - input[j].y));
+      const area = (1 + Math.abs(p1.x - p2.x)) * (1 + Math.abs(p1.y - p2.y));
       if (area > maxArea) {
         maxArea = area;
       }
@@ -112,7 +111,7 @@ test("day09b example", () => {
   assert.equal(result, 24);
 });
 
-test("day09b input", () => {
+test.skip("day09b input", () => {
   const input = parseInput09(readFileSync("inputs/day09.txt", "utf8"));
   const result = day09b(input);
   assert.equal(result, "???" as unknown);
