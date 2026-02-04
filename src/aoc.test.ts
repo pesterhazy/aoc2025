@@ -35,6 +35,35 @@ function day09a(input: Point2[]): number {
   return maxArea;
 }
 
+function day09b(input: Point2[]): number {
+  let maxArea = -Infinity;
+  for (let i = 0; i < input.length; i++) {
+    for (let j = 0; j < input.length; j++) {
+      if (i === j) continue;
+
+      const p1 = input[i];
+      const p2 = input[j];
+      const p3 = { x: p1.x, y: p2.y };
+      const p4 = { x: p2.x, y: p1.y };
+
+      if (
+        !isPointInClosedPolygon(p3, input) ||
+        !isPointInClosedPolygon(p4, input)
+      ) {
+        continue;
+      }
+
+      const area =
+        (1 + Math.abs(input[i].x - input[j].x)) *
+        (1 + Math.abs(input[i].y - input[j].y));
+      if (area > maxArea) {
+        maxArea = area;
+      }
+    }
+  }
+  return maxArea;
+}
+
 test("isPointInClosedPolygon", () => {
   assert.equal(
     isPointInClosedPolygon({ x: 0, y: 0 }, [
@@ -75,4 +104,10 @@ test("day09 input", () => {
   const input = parseInput09(readFileSync("inputs/day09.txt", "utf8"));
   const result = day09a(input);
   assert.equal(result, 4771508457);
+});
+
+test("day09b example", () => {
+  const input = parseInput09(example09);
+  const result = day09b(input);
+  assert.equal(result, 24);
 });

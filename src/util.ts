@@ -4,41 +4,39 @@ export function isPointInClosedPolygon(
   point: Point2,
   polygon: Point2[],
 ): boolean {
-  if (polygon.length < 3) return false;
-
+  const { x, y } = point;
   let inside = false;
-  const n = polygon.length;
 
-  for (let i = 0; i < n; i++) {
-    const j = (i + 1) % n;
-    const pi = polygon[i];
-    const pj = polygon[j];
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i].x;
+    const yi = polygon[i].y;
+    const xj = polygon[j].x;
+    const yj = polygon[j].y;
 
-    // Check if point is on the edge
-    if (isPointOnSegment(point, pi, pj)) {
+    // Check if point is exactly on the edge (closed polygon behavior)
+    const onEdge =
+      (y - yi) * (xj - xi) === (x - xi) * (yj - yi) &&
+      x >= Math.min(xi, xj) &&
+      x <= Math.max(xi, xj) &&
+      y >= Math.min(yi, yj) &&
+      y <= Math.max(yi, yj);
+
+    if (onEdge) {
       return true;
     }
 
-    // Ray casting: check if horizontal ray from point to the right crosses edge (pi, pj)
-    const yi = pi.y;
-    const yj = pj.y;
-    const xi = pi.x;
-    const xj = pj.x;
+    // Ray-casting toggle
+    const intersects =
+      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
 
-    // Check if edge crosses the horizontal line through point
-    if (yi > point.y !== yj > point.y) {
-      // Calculate x-coordinate of intersection point
-      const xIntersect = ((xj - xi) * (point.y - yi)) / (yj - yi) + xi;
-
-      // If intersection is to the right of the point, toggle inside
-      if (point.x < xIntersect) {
-        inside = !inside;
-      }
+    if (intersects) {
+      inside = !inside;
     }
   }
 
   return inside;
 }
+
 export function isPointOnSegment(
   point: Point2,
   p1: Point2,
