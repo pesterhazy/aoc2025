@@ -105,7 +105,7 @@ function day09b(input: Point2[]): number {
       const path = [p1c, p2c, p3c, p4c];
 
       let pointOutside = false;
-      for (let k = 0; k < path.length - 1; k++) {
+      for (let k = 0; k < path.length; k++) {
         const curc = path[k];
         const nextc = path[(k + 1) % path.length]; // wrap around
 
