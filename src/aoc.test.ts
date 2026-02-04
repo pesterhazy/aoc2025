@@ -276,6 +276,42 @@ function parseInput10(input: string): Input10[] {
   });
 }
 
+function solve10(input: Input10): number {
+  if (input.goalState === 0) {
+    return 0;
+  }
+
+  const options: Set<number> = new Set();
+  for (const button of input.buttons) {
+    options.add(button);
+  }
+
+  function recurse(path: number[]): number {
+    let answer = Infinity;
+    for (const option of [...options]) {
+      options.delete(option);
+
+      const v = path.reduce((a, b) => a ^ b, 0);
+
+      if (v === input.goalState) {
+        options.add(option);
+
+        return path.length;
+      }
+      const result = recurse([...path, option]);
+      answer = Math.min(answer, result);
+      options.add(option);
+    }
+    return answer;
+  }
+
+  return recurse([]);
+}
+
+function day10a(input: Input10[]): number {
+  return input.map(solve10).reduce((a, b) => a + b, 0);
+}
+
 test("parseInput10", () => {
   const input = parseInput10(example10);
   assert.equal(input.length, 3);
@@ -285,4 +321,16 @@ test("parseInput10", () => {
     [0b0001, 0b0101, 0b0010, 0b0011, 0b1010, 0b1100],
   );
   assert.deepEqual(input[0].joltage, [3, 5, 4, 7]);
+});
+
+test("solve10 example", () => {
+  const input = parseInput10(example10);
+  const result = solve10(input[0]);
+  assert.equal(result, 2);
+});
+
+test("day10a example", () => {
+  const input = parseInput10(example10);
+  const result = day10a(input);
+  assert.equal(result, 7);
 });
