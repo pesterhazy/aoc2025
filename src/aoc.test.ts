@@ -201,5 +201,5 @@ test("day09b example", () => {
 test.skip("day09b input", () => {
   const input = parseInput09(readFileSync("inputs/day09.txt", "utf8"));
   const result = day09b(input);
-  assert.equal(result, "???" as unknown);
-});
+  assert.equal(result, 1539809693);
+}, 60_000);
