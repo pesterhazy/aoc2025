@@ -343,8 +343,8 @@ test("day10a example", () => {
   assert.equal(result, 7);
 });
 
-test.skip("day10a input", () => {
+test("day10a input", () => {
   const input = parseInput10(readFileSync("inputs/day10.txt", "utf8"));
   const result = day10a(input);
-  assert.equal(result, "???" as unknown);
+  assert.equal(result, 475);
 });
