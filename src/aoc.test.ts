@@ -97,8 +97,12 @@ function day09b(input: Point2[]): number {
       const point4 = { x: point3.x, y: point1.y };
 
       // Check corners first - fast rejection
-      if (!checkInside(point1) || !checkInside(point2) ||
-          !checkInside(point3) || !checkInside(point4)) {
+      if (
+        !checkInside(point1) ||
+        !checkInside(point2) ||
+        !checkInside(point3) ||
+        !checkInside(point4)
+      ) {
         continue;
       }
 
@@ -220,3 +224,65 @@ test("day09b input", () => {
   const result = day09b(input);
   assert.equal(result, 1539809693);
 }, 60_000);
+
+const example10 = `[.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
+[...#.] (0,2,3,4) (2,3) (0,4) (0,1,2) (1,2,3,4) {7,5,12,7,2}
+[.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}`;
+
+type Input10 = {
+  goalState: number;
+  buttons: number[];
+  joltage: number[];
+};
+
+function parseInput10(input: string): Input10[] {
+  return input.split("\n").map((line) => {
+    const segments = line.split(" ");
+    const first = segments[0];
+    const last = segments[segments.length - 1];
+    const rest = segments.slice(1, segments.length - 1);
+
+    const binaryString = first
+      .slice(1, -1)
+      .replaceAll(".", "0")
+      .replaceAll("#", "1");
+    const numDigits = binaryString.length;
+    const goalState = parseInt(binaryString, 2);
+    const buttons = rest.map((s) => {
+      const numbers = s.match(/\d+/g);
+      if (numbers === null) {
+        throw new Error(`Invalid input: ${s}`);
+      }
+
+      let v = 0;
+
+      for (const number of numbers) {
+        const shifts = numDigits - 1 - Number(number);
+        v |= 1 << shifts;
+      }
+
+      return v;
+    });
+    const joltage = last.match(/\d+/g);
+    if (joltage === null) {
+      throw new Error(`Invalid input: ${last}`);
+    }
+
+    return {
+      goalState,
+      buttons,
+      joltage: joltage.map(Number),
+    };
+  });
+}
+
+test("parseInput10", () => {
+  const input = parseInput10(example10);
+  assert.equal(input.length, 3);
+  assert.equal(input[0].goalState, 0b0110);
+  assert.deepEqual(
+    input[0].buttons,
+    [0b0001, 0b0101, 0b0010, 0b0011, 0b1010, 0b1100],
+  );
+  assert.deepEqual(input[0].joltage, [3, 5, 4, 7]);
+});
