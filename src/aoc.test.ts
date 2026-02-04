@@ -76,14 +76,31 @@ function invalidState(): never {
 function day09b(input: Point2[]): number {
   const compressed = compressPoints(input);
   let maxArea = -Infinity;
-  for (let i = 0; i < input.length; i++) {
-    for (let j = 0; j < input.length; j++) {
-      if (i === j) continue;
 
+  // Cache polygon membership tests
+  const insideCache = new Map<string, boolean>();
+  const checkInside = (p: Point2): boolean => {
+    const key = `${p.x},${p.y}`;
+    if (insideCache.has(key)) {
+      return insideCache.get(key)!;
+    }
+    const result = isPointInClosedPolygon(p, input);
+    insideCache.set(key, result);
+    return result;
+  };
+
+  for (let i = 0; i < input.length; i++) {
+    for (let j = i + 1; j < input.length; j++) {
       const point1 = input[i];
       const point3 = input[j];
       const point2 = { x: point1.x, y: point3.y };
       const point4 = { x: point3.x, y: point1.y };
+
+      // Check corners first - fast rejection
+      if (!checkInside(point1) || !checkInside(point2) ||
+          !checkInside(point3) || !checkInside(point4)) {
+        continue;
+      }
 
       const p1c: Point2 = {
         x: compressed.normalToCompressedX.get(point1.x) ?? invalidState(),
@@ -107,7 +124,7 @@ function day09b(input: Point2[]): number {
       let pointOutside = false;
       for (let k = 0; k < path.length; k++) {
         const curc = path[k];
-        const nextc = path[(k + 1) % path.length]; // wrap around
+        const nextc = path[(k + 1) % path.length];
 
         const increment: Point2 = {
           x: Math.sign(nextc.x - curc.x),
@@ -126,7 +143,7 @@ function day09b(input: Point2[]): number {
             x: compressed.compressedToNormalX.get(c.x) ?? invalidState(),
             y: compressed.compressedToNormalY.get(c.y) ?? invalidState(),
           };
-          if (!isPointInClosedPolygon(p, input)) {
+          if (!checkInside(p)) {
             pointOutside = true;
             break;
           }
@@ -198,7 +215,7 @@ test("day09b example", () => {
   assert.equal(result, 24);
 });
 
-test.skip("day09b input", () => {
+test("day09b input", () => {
   const input = parseInput09(readFileSync("inputs/day09.txt", "utf8"));
   const result = day09b(input);
   assert.equal(result, 1539809693);
