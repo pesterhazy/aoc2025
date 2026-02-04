@@ -286,7 +286,15 @@ function solve10(input: Input10): number {
     options.add(button);
   }
 
+  const seen: Set<string> = new Set();
+
   function recurse(path: number[]): number {
+    const key = path.toSorted().join(",");
+    if (seen.has(key)) {
+      return Infinity;
+    }
+    seen.add(key);
+
     let answer = Infinity;
     for (const option of [...options]) {
       options.delete(option);
@@ -333,4 +341,10 @@ test("day10a example", () => {
   const input = parseInput10(example10);
   const result = day10a(input);
   assert.equal(result, 7);
+});
+
+test.skip("day10a input", () => {
+  const input = parseInput10(readFileSync("inputs/day10.txt", "utf8"));
+  const result = day10a(input);
+  assert.equal(result, "???" as unknown);
 });
