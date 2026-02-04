@@ -111,3 +111,9 @@ test("day09b example", () => {
   const result = day09b(input);
   assert.equal(result, 24);
 });
+
+test("day09b input", () => {
+  const input = parseInput09(readFileSync("inputs/day09.txt", "utf8"));
+  const result = day09b(input);
+  assert.equal(result, "???" as unknown);
+});
