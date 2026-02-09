@@ -19,10 +19,7 @@ const TYPE_CHECK_FAILURE_EMOJI = "🟨".repeat(8);
 const IGNORED_PATHS = [".git", "node_modules", "test-output.json"];
 
 async function playSound(soundFile: string) {
-  await Bun.spawn(["afplay", `sounds/${soundFile}`], {
-    stdout: "inherit",
-    stderr: "inherit",
-  }).exited;
+  await $`afplay sounds/${soundFile}`;
 }
 
 async function* watchFiles() {
@@ -141,16 +138,19 @@ async function main() {
   let lastRunCounter = 0;
   let resolveWait: null | (() => void) = null;
 
-  // Watch for file changes
+  const triggerTestRun = () => {
+    testRunCounter++;
+    if (resolveWait) {
+      const resolve: () => void = resolveWait;
+      resolveWait = null;
+      resolve();
+    }
+  };
+
   (async () => {
     for await (const event of watchFiles()) {
       console.log(`\nFile changed: ${event.filename}`);
-      testRunCounter++;
-      if (resolveWait) {
-        const resolve: () => void = resolveWait;
-        resolveWait = null;
-        resolve();
-      }
+      triggerTestRun();
     }
   })();
 
@@ -158,12 +158,7 @@ async function main() {
   process.stdin.on("data", (key) => {
     if (key[0] === 13 || key[0] === 10) {
       console.log(`\nManual test trigger`);
-      testRunCounter++;
-      if (resolveWait) {
-        const resolve: () => void = resolveWait;
-        resolveWait = null;
-        resolve();
-      }
+      triggerTestRun();
     }
     // Check for Ctrl+C
     if (key[0] === 3) {
