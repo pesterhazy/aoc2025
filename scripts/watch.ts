@@ -31,7 +31,7 @@ async function* watchFiles() {
   for await (const event of watcher) {
     const shouldIgnore = IGNORED_PATHS.some(
       (path) =>
-        event.filename === path || event.filename?.startsWith(`${path}/`)
+        event.filename === path || event.filename?.startsWith(`${path}/`),
     );
 
     if (shouldIgnore) {
@@ -90,7 +90,7 @@ async function sendNotification(result: {
 
   const script = `display notification "${message.replace(
     /"/g,
-    '\\"'
+    '\\"',
   )}" with title "${title.replace(/"/g, '\\"')}"`;
   await Bun.spawn(["osascript", "-e", script], {
     stdout: "inherit",
@@ -141,6 +141,7 @@ async function main() {
   let lastRunCounter = 0;
   let resolveWait: null | (() => void) = null;
 
+  // Watch for file changes
   (async () => {
     for await (const event of watchFiles()) {
       console.log(`\nFile changed: ${event.filename}`);
@@ -152,6 +153,24 @@ async function main() {
       }
     }
   })();
+
+  process.stdin.setRawMode(true);
+  process.stdin.on("data", (key) => {
+    if (key[0] === 13 || key[0] === 10) {
+      console.log(`\nManual test trigger`);
+      testRunCounter++;
+      if (resolveWait) {
+        const resolve: () => void = resolveWait;
+        resolveWait = null;
+        resolve();
+      }
+    }
+    // Check for Ctrl+C
+    if (key[0] === 3) {
+      console.log("\nClosing watcher...");
+      process.exit(0);
+    }
+  });
 
   while (true) {
     if (testRunCounter > lastRunCounter) {
