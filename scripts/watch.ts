@@ -81,7 +81,7 @@ async function sendNotification(result: {
   } else if (!result.vetPassed) {
     title = TYPE_CHECK_FAILURE_EMOJI;
     message = result.errorOutput;
-    soundFile = "fail.wav";
+    soundFile = "fail2.wav";
   } else {
     title = TEST_FAILURE_EMOJI;
     message = result.errorOutput;
