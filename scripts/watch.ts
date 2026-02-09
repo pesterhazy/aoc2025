@@ -18,6 +18,13 @@ const TYPE_CHECK_FAILURE_EMOJI = "🟨".repeat(8);
 
 const IGNORED_PATHS = [".git", "node_modules", "test-output.json"];
 
+async function playSound(soundFile: string) {
+  await Bun.spawn(["afplay", `sounds/${soundFile}`], {
+    stdout: "inherit",
+    stderr: "inherit",
+  }).exited;
+}
+
 async function* watchFiles() {
   const watcher = watch(".", { recursive: true });
 
@@ -65,16 +72,20 @@ async function sendNotification(result: {
 }) {
   let title: string;
   let message: string;
+  let soundFile: string;
 
   if (result.vetPassed && result.testPassed) {
     title = SUCCESS_EMOJI;
     message = "OK";
+    soundFile = "success.wav";
   } else if (!result.vetPassed) {
     title = TYPE_CHECK_FAILURE_EMOJI;
     message = result.errorOutput;
+    soundFile = "fail.wav";
   } else {
     title = TEST_FAILURE_EMOJI;
     message = result.errorOutput;
+    soundFile = "fail.wav";
   }
 
   const script = `display notification "${message.replace(
@@ -85,9 +96,12 @@ async function sendNotification(result: {
     stdout: "inherit",
     stderr: "inherit",
   }).exited;
+
+  void playSound(soundFile);
 }
 
 async function runChecks() {
+  void playSound("start.wav");
   const vetResult = await $`dum --silent vet`.nothrow();
   const vetPassed = vetResult.exitCode === 0;
 
