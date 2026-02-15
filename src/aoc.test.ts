@@ -360,15 +360,22 @@ test("day10a input", () => {
 });
 
 function solve10b(input: Input10) {
+  let best = Infinity;
   const bestSoFar: Map<string, number> = new Map();
   function recurse(n: number, state: number[]): number {
+    if (n >= best) {
+      return Infinity;
+    }
     const key = JSON.stringify(state);
     if (bestSoFar.has(key) && bestSoFar.get(key)! <= n) {
       return Infinity;
     }
     bestSoFar.set(key, n);
 
-    if (state.every((i) => i === 0)) return n;
+    if (state.every((i) => i === 0)) {
+      best = Math.min(best, n);
+      return best;
+    }
     if (state.some((i) => i < 0)) return Infinity;
 
     let results: number[] = [];
