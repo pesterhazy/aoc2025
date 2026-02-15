@@ -233,6 +233,7 @@ type Input10 = {
   goalState: number;
   buttons: number[];
   joltage: number[];
+  configs: number[][];
 };
 
 function parseInput10(input: string): Input10[] {
@@ -263,6 +264,14 @@ function parseInput10(input: string): Input10[] {
 
       return v;
     });
+    const configs = rest.map((s) => {
+      const numbers = s.match(/\d+/g);
+      if (numbers === null) {
+        throw new Error(`Invalid input: ${s}`);
+      }
+
+      return numbers.map((number) => Number(number));
+    });
     const joltage = last.match(/\d+/g);
     if (joltage === null) {
       throw new Error(`Invalid input: ${last}`);
@@ -271,12 +280,13 @@ function parseInput10(input: string): Input10[] {
     return {
       goalState,
       buttons,
+      configs,
       joltage: joltage.map(Number),
     };
   });
 }
 
-function solve10(input: Input10): number {
+function solve10a(input: Input10): number {
   if (input.goalState === 0) {
     return 0;
   }
@@ -317,7 +327,7 @@ function solve10(input: Input10): number {
 }
 
 function day10a(input: Input10[]): number {
-  return input.map(solve10).reduce((a, b) => a + b, 0);
+  return input.map(solve10a).reduce((a, b) => a + b, 0);
 }
 
 test("parseInput10", () => {
@@ -333,7 +343,7 @@ test("parseInput10", () => {
 
 test("solve10 example", () => {
   const input = parseInput10(example10);
-  const result = solve10(input[0]);
+  const result = solve10a(input[0]);
   assert.equal(result, 2);
 });
 
@@ -347,4 +357,33 @@ test("day10a input", () => {
   const input = parseInput10(readFileSync("inputs/day10.txt", "utf8"));
   const result = day10a(input);
   assert.equal(result, 475);
+});
+
+function solve10b(input: Input10) {
+  function recurse(n: number, state: number[]): number {
+    if (state.every((i) => i === 0)) return n;
+    if (state.some((i) => i < 0)) return Infinity;
+
+    let results: number[] = [];
+    for (const config of input.configs) {
+      let newState = [...state];
+      for (const num of config) {
+        newState[num]--;
+      }
+      results.push(recurse(n + 1, newState));
+    }
+    return Math.min(...results);
+  }
+
+  return recurse(0, input.joltage);
+}
+
+function day10b(inputs: Input10[]) {
+  return inputs.map(solve10b);
+}
+
+test("solve10b example", () => {
+  const input = parseInput10(example10);
+  const result = solve10b(input[0]);
+  assert.equal(result, 10);
 });
