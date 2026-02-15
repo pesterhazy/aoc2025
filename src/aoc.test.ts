@@ -360,7 +360,14 @@ test("day10a input", () => {
 });
 
 function solve10b(input: Input10) {
+  const seen: Set<string> = new Set();
   function recurse(n: number, state: number[]): number {
+    const key = JSON.stringify([n, state]);
+    if (seen.has(key)) {
+      return Infinity;
+    }
+    seen.add(key);
+
     if (state.every((i) => i === 0)) return n;
     if (state.some((i) => i < 0)) return Infinity;
 
