@@ -360,13 +360,13 @@ test("day10a input", () => {
 });
 
 function solve10b(input: Input10) {
-  const seen: Set<string> = new Set();
+  const bestSoFar: Map<string, number> = new Map();
   function recurse(n: number, state: number[]): number {
-    const key = JSON.stringify([n, state]);
-    if (seen.has(key)) {
+    const key = JSON.stringify(state);
+    if (bestSoFar.has(key) && bestSoFar.get(key)! <= n) {
       return Infinity;
     }
-    seen.add(key);
+    bestSoFar.set(key, n);
 
     if (state.every((i) => i === 0)) return n;
     if (state.some((i) => i < 0)) return Infinity;
@@ -379,18 +379,25 @@ function solve10b(input: Input10) {
       }
       results.push(recurse(n + 1, newState));
     }
-    return Math.min(...results);
+    const result = Math.min(...results);
+    return result;
   }
 
   return recurse(0, input.joltage);
 }
 
 function day10b(inputs: Input10[]) {
-  return inputs.map(solve10b);
+  return inputs.map(solve10b).reduce((a, b) => a + b, 0);
 }
 
 test("solve10b example", () => {
   const input = parseInput10(example10);
   const result = solve10b(input[0]);
   assert.equal(result, 10);
+});
+
+test.skip("day10b input", () => {
+  const input = parseInput10(readFileSync("inputs/day10.txt", "utf8"));
+  const result = day10b(input);
+  assert.equal(result, 42);
 });

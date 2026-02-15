@@ -4,7 +4,7 @@
   "description": "Advent of code 2025",
   "main": "index.js",
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --reporter=verbose",
     "tw": "bun scripts/watch.ts",
     "vet": "tsgo --noEmit"
   },
