@@ -395,9 +395,11 @@ function solve10b(input: Input10) {
   return recurse(0, input.joltage);
 }
 
-async function solve10bWithZ3(input: Input10): Promise<number> {
-  const { Context } = await init();
-  const { Optimize, Int } = new Context("main");
+async function solve10bWithZ3(
+  input: Input10,
+  ctx: Awaited<ReturnType<typeof init>>["Context"],
+): Promise<number> {
+  const { Optimize, Int } = new ctx("main");
 
   const constants = input.configs.map((_, i) => Int.const(`p${i}`));
 
@@ -429,13 +431,17 @@ async function solve10bWithZ3(input: Input10): Promise<number> {
 }
 
 async function day10b(inputs: Input10[]) {
-  const results = await Promise.all(inputs.map(solve10bWithZ3));
+  const { Context } = await init();
+  const results = await Promise.all(
+    inputs.map((input) => solve10bWithZ3(input, Context)),
+  );
   return results.reduce((a, b) => a + b, 0);
 }
 
 test("solve10b example", async () => {
+  const { Context } = await init();
   const input = parseInput10(example10);
-  const result = await solve10bWithZ3(input[0]);
+  const result = await solve10bWithZ3(input[0], Context);
   assert.equal(result, 10);
 });
 
