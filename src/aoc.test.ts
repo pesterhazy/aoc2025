@@ -2,6 +2,8 @@ import { readFileSync } from "fs";
 import { isPointInClosedPolygon } from "./util";
 import { Point2 } from "./types";
 
+import { init } from "z3-solver";
+
 const example09 = `7,1
 11,1
 11,7
@@ -393,18 +395,52 @@ function solve10b(input: Input10) {
   return recurse(0, input.joltage);
 }
 
-function day10b(inputs: Input10[]) {
-  return inputs.map(solve10b).reduce((a, b) => a + b, 0);
+async function solve10bWithZ3(input: Input10): Promise<number> {
+  const { Context } = await init();
+  const { Optimize, Int } = new Context("main");
+
+  const constants = input.configs.map((_, i) => Int.const(`p${i}`));
+
+  const optimizer = new Optimize();
+
+  for (const [i, joltage] of input.joltage.entries()) {
+    const relevantConstants = input.configs.flatMap((config, j) =>
+      config.includes(i) ? [constants[j]] : [],
+    );
+
+    const sum = relevantConstants.reduce((acc, c) => acc.add(c));
+    optimizer.add(sum.eq(joltage));
+  }
+  for (let i = 0; i < input.configs.length; i++) {
+    optimizer.add(constants[i].ge(0));
+  }
+
+  const totalSum = constants.reduce((acc, c) => acc.add(c));
+  optimizer.minimize(totalSum);
+
+  const result = await optimizer.check();
+
+  if (result === "sat") {
+    const model = optimizer.model();
+    return Number(model.eval(totalSum).toString());
+  } else {
+    throw new Error("No solution exists");
+  }
 }
 
-test("solve10b example", () => {
+async function day10b(inputs: Input10[]) {
+  const results = await Promise.all(inputs.map(solve10bWithZ3));
+  return results.reduce((a, b) => a + b, 0);
+}
+
+test("solve10b example", async () => {
   const input = parseInput10(example10);
-  const result = solve10b(input[0]);
+  const result = await solve10bWithZ3(input[0]);
   assert.equal(result, 10);
 });
 
-test.skip("day10b input", () => {
+test("day10b input", async () => {
   const input = parseInput10(readFileSync("inputs/day10.txt", "utf8"));
-  const result = day10b(input);
+  const result = await day10b(input);
   assert.equal(result, 42);
 });
