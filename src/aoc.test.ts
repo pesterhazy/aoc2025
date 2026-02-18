@@ -442,5 +442,5 @@ test("solve10b example", async () => {
 test("day10b input", async () => {
   const input = parseInput10(readFileSync("inputs/day10.txt", "utf8"));
   const result = await day10b(input);
-  assert.equal(result, 42);
+  assert.equal(result, 18273);
 }, 60000);
