@@ -473,27 +473,26 @@ function parseInput11(input: string): Map<string, string[]> {
 
 function countPaths(m: Map<string, string[]>, from: string, to: string) {
   console.log(`countPaths from=${from} to=${to}`);
-  let ans = 0;
-  const q: string[] = [from];
+  const memo = new Map<string, number>();
 
-  while (q.length > 0) {
-    const node = q.shift();
-    if (node === undefined) throw new Error("Unexpected state");
+  function count(node: string): number {
+    if (node === to) return 1;
+    if (node === "out") return 0;
 
-    if (node === to) {
-      ans++;
-    } else {
-      if (node !== "out") {
-        const result = m.get(node);
-        if (result === undefined)
-          throw new Error("Unexpected state, node not found: " + node);
-        for (const child of m.get(node)!) {
-          q.push(child);
-        }
-      }
+    if (memo.has(node)) return memo.get(node)!;
+
+    const children = m.get(node);
+    if (!children) throw new Error(`Unexpected: not found: ${node}`);
+
+    let result = 0;
+    for (const child of children) {
+      result += count(child);
     }
+    memo.set(node, result);
+    return result;
   }
-  return ans;
+
+  return count(from);
 }
 
 const example11b = `svr: aaa bbb
@@ -538,7 +537,7 @@ test("day11a input", () => {
   assert.equal(result, 448);
 });
 
-test("day11b example", () => {
+test.only("day11b example", () => {
   const input = parseInput11(example11b);
   const result = day11b(input);
   assert.equal(result, 2);
