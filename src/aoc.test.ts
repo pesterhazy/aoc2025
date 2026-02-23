@@ -472,6 +472,7 @@ function parseInput11(input: string): Map<string, string[]> {
 }
 
 function countPaths(m: Map<string, string[]>, from: string, to: string) {
+  console.log(`countPaths from=${from} to=${to}`);
   let ans = 0;
   const q: string[] = [from];
 
@@ -543,7 +544,7 @@ test("day11b example", () => {
   assert.equal(result, 2);
 });
 
-test.skip("day11b input", () => {
+test.only("day11b input", () => {
   const input = parseInput11(readFileSync("inputs/day11.txt", "utf8"));
   const result = day11b(input);
   assert.equal(result, "???" as unknown);
