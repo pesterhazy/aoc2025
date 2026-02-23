@@ -537,14 +537,14 @@ test("day11a input", () => {
   assert.equal(result, 448);
 });
 
-test.only("day11b example", () => {
+test("day11b example", () => {
   const input = parseInput11(example11b);
   const result = day11b(input);
   assert.equal(result, 2);
 });
 
-test.only("day11b input", () => {
+test("day11b input", () => {
   const input = parseInput11(readFileSync("inputs/day11.txt", "utf8"));
   const result = day11b(input);
-  assert.equal(result, "???" as unknown);
+  assert.equal(result, 553204221431080);
 });
