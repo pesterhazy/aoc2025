@@ -471,19 +471,24 @@ function parseInput11(input: string): Map<string, string[]> {
   return graph;
 }
 
-function day11a(m: Map<string, string[]>) {
+function countPaths(m: Map<string, string[]>, from: string, to: string) {
   let ans = 0;
-  const q: string[] = ["you"];
+  const q: string[] = [from];
 
   while (q.length > 0) {
     const node = q.shift();
     if (node === undefined) throw new Error("Unexpected state");
 
-    if (node === "out") {
+    if (node === to) {
       ans++;
     } else {
-      for (const child of m.get(node)!) {
-        q.push(child);
+      if (node !== "out") {
+        const result = m.get(node);
+        if (result === undefined)
+          throw new Error("Unexpected state, node not found: " + node);
+        for (const child of m.get(node)!) {
+          q.push(child);
+        }
       }
     }
   }
@@ -510,41 +515,25 @@ type Job11 = {
 };
 
 function day11b(m: Map<string, string[]>) {
-  let ans = 0;
-  const q: Job11[] = [{ node: "svr", seen: new Set() }];
+  const ans =
+    countPaths(m, "svr", "fft") *
+      countPaths(m, "fft", "dac") *
+      countPaths(m, "dac", "out") +
+    countPaths(m, "svr", "dac") *
+      countPaths(m, "dac", "fft") *
+      countPaths(m, "fft", "out");
 
-  while (q.length > 0) {
-    const item = q.shift();
-    if (item === undefined) throw new Error("Unexpected state");
-
-    if (item.node === "out") {
-      if (item.seen.has("fft") && item.seen.has("dac")) ans++;
-    } else {
-      const result = m.get(item.node);
-      if (result === undefined)
-        throw new Error(`Unexpected state. Node not found: ${item.node}`);
-      for (const child of result) {
-        if (item.seen.has(child))
-          throw new Error(
-            `Unexpected state. Loop detected: ${item.node} -> ${child} (${JSON.stringify([...item.seen])})`,
-          );
-        const newSeen = new Set(item.seen);
-        newSeen.add(child);
-        q.push({ node: child, seen: newSeen });
-      }
-    }
-  }
   return ans;
 }
 test("day11a example", () => {
   const input = parseInput11(example11a);
-  const result = day11a(input);
+  const result = countPaths(input, "you", "out");
   assert.equal(result, 5);
 });
 
 test("day11a input", () => {
   const input = parseInput11(readFileSync("inputs/day11.txt", "utf8"));
-  const result = day11a(input);
+  const result = countPaths(input, "you", "out");
   assert.equal(result, 448);
 });
 
@@ -552,4 +541,10 @@ test("day11b example", () => {
   const input = parseInput11(example11b);
   const result = day11b(input);
   assert.equal(result, 2);
+});
+
+test.skip("day11b input", () => {
+  const input = parseInput11(readFileSync("inputs/day11.txt", "utf8"));
+  const result = day11b(input);
+  assert.equal(result, "???" as unknown);
 });
